@@ -8,9 +8,9 @@ import numpy as np
 import time
 from imutils.object_detection import non_max_suppression
 
-orig = cv2.imread("images/lebron_james.jpg",1)  
+orig = cv2.imread("images/test2.jpeg",1)  
 (H, W) = orig.shape[:2] 
-new_H = 320
+new_H = 160
 new_W = 320
 rW = W / float(new_W)
 rH = H / float(new_H)            
