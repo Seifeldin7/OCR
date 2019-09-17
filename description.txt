@@ -7,4 +7,5 @@ Steps :
     2- Convert the image to blobs (Blob is a group of connected pixels in an image that share some common property)
     3- loading EAST layer
     4- feed forward the converted blobs to EAST
-    5- 
+    5- calculate box arround the word if it's score is greater than a specified value
+    6- draw the box
