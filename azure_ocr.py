@@ -21,5 +21,16 @@ start = time.time()
 response = requests.post(ocr_url, headers=headers, params=params, data=image_data)
 # response.raise_for_status()
 analysis = response.json()
+print(analysis)
 print("time is ", time.time() - start)
 #print("image url is ",image_url)
+line_infos = [region["lines"] for region in analysis["regions"]]
+word_infos = []
+for line in line_infos:
+    for word_metadata in line:
+        for word_info in word_metadata["words"]:
+            word_infos.append(word_info)
+word_infos
+for word in word_infos:
+    text = word["text"]
+    print(text)
