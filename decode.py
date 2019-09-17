@@ -4,7 +4,9 @@
         geometry np array
         score threshold
 '''
+
 import numpy as np
+
 def decode(scores,geometry,threshold) :
     (numRows, numCols) = scores.shape[2:4]
     rects = []
