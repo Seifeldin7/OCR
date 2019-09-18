@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
 import pytesseract
-from PIL import Image
 
-# Path of working folder on Disk
 HSV_RANGES = {
     # red is a major color
     'red': [
@@ -74,6 +72,11 @@ HSV_RANGES = {
         }
     ]
 }
+def edge_detect(frame):
+  frame = cv2.Canny(frame, 100, 100)
+  blur5 = cv2.GaussianBlur(frame,(5,5),0)
+  blur3 = cv2.GaussianBlur(frame,(1,1),0)
+  return blur5-blur3
 
 # Creates a binary mask from HSV image using given colors.
 def create_mask(hsv_img, colors):
@@ -92,9 +95,9 @@ def create_mask(hsv_img, colors):
 
     return mask
 
-def get_string(img_path):
+def get_string(img):
     # Read image with opencv
-    img = cv2.imread(img_path)
+    #img = cv2.imread(img_path)
 
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -113,8 +116,54 @@ def get_string(img_path):
     return result
 
 
-print(get_string("tesseract_header.jpg"))
+def isPaper(frame):
 
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    _, mask = cv2.threshold(hsv, 200, 255, cv2.THRESH_BINARY)
+
+    #inverse of the mask
+    mask_inv = cv2.bitwise_not(mask)
+
+    #remove noise
+    kernel = np.ones((11,11),np.uint8)
+    mask_inv = cv2.morphologyEx(mask_inv, cv2.MORPH_CLOSE, kernel)
+    #get contour of paper
+    edges = edge_detect(mask_inv)
+    cnts_t,_  = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    c = max(cnts_t, key=cv2.contourArea)
+
+    #get extreme points of the paper
+    leftmost = tuple(c[c[:,:,0].argmin()][0])
+    rightmost = tuple(c[c[:,:,0].argmax()][0])
+    topmost = tuple(c[c[:,:,1].argmin()][0])
+    bottommost = tuple(c[c[:,:,1].argmax()][0])
+    x,top_y = topmost
+    x,bot_y = bottommost
+    lef_x,y = leftmost
+    right_x,y = rightmost
+
+    #get the prespective of the paper
+    pts1 = np.float32([[lef_x, top_y], [right_x, top_y], [lef_x, bot_y], [right_x, bot_y]])
+    pts2 = np.float32([[0, 0], [500, 0], [0, 600], [500, 600]])
+    matrix = cv2.getPerspectiveTransform(pts1, pts2)
+    result = cv2.warpPerspective(frame, matrix, (500, 600))
+
+
+    #show image of paper only
+    cv2.imshow("paper",result)
+
+#apply ocr using tesseract to get text and print it
+    print(get_string(result))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+frame = cv2.imread("text.png")
+choice = input("is the image in a paper? write p for paper")
+if(choice == 'p'):
+    isPaper(frame)
+else:
+    print(get_string(frame))
 # i tried to get the words of each color
 
 
