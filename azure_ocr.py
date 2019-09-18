@@ -31,6 +31,8 @@ for line in line_infos:
         for word_info in word_metadata["words"]:
             word_infos.append(word_info)
 word_infos
+text=""
 for word in word_infos:
-    text = word["text"]
-    print(text)
+    text =text + word["text"] + " "
+
+print(text)
