@@ -1,38 +1,36 @@
+# azure return JASON structure
+#   | language 
+#   | oriantation
+#   | text angle
+#   | Regions
+#       | boundingBox : cordinates of the bounding Box of all the text
+#       | lines 
+#             | boundingBox : cordinates of the bounding Box of all the line
+#             | words
+#                 | text : the text
+#                 | boundingBox : cordinates of the bounding Box of all the text
+
 import requests
 import time
 from PIL import Image
 from io import BytesIO
-vision_base_url = "https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/"
 
-ocr_url = vision_base_url + "ocr"
-#image_url = "https://i.stack.imgur.com/vrkIj.png"
+vision_base_url = "https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr"
+key = "12bb5c83fb9a4d5e9df7417fd0016200"
 
+image_path = "images/test2.jpeg"
+image_data = open(image_path, "rb").read()
 
 params = {'language': 'unk', 'detectOrientation': 'false'}
-#data = {'url': image_url}
+headers = {'Ocp-Apim-Subscription-Key': key, 'Content-Type': 'application/octet-stream'}
 
-image_path = "img2.jpg"
-image_data = open(image_path, "rb").read()
-# Set Content-Type to octet-stream
-headers = {'Ocp-Apim-Subscription-Key': "12bb5c83fb9a4d5e9df7417fd0016200", 'Content-Type': 'application/octet-stream'}
-# put the byte array into your post request
-print(image_data)
 start = time.time()
-response = requests.post(ocr_url, headers=headers, params=params, data=image_data)
-# response.raise_for_status()
+response = requests.post(vision_base_url, headers=headers, params=params, data=image_data)
 analysis = response.json()
-print(analysis)
 print("time is ", time.time() - start)
-#print("image url is ",image_url)
-line_infos = [region["lines"] for region in analysis["regions"]]
-word_infos = []
-for line in line_infos:
-    for word_metadata in line:
-        for word_info in word_metadata["words"]:
-            word_infos.append(word_info)
-word_infos
-text=""
-for word in word_infos:
-    text =text + word["text"] + " "
 
-print(text)
+for lines in analysis["regions"] :
+    for line in lines["lines"] :
+        for word in line["words"] :
+            print(word["text"])
+
